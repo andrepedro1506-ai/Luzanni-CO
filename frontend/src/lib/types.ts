@@ -53,3 +53,43 @@ export interface Dre {
   lucroLiquido: number;
   margemLiquida: number;
 }
+
+export interface Supplier {
+  id: number;
+  name: string;
+  cnpj: string | null;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
+  state: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export type PaymentMethod =
+  | "pix"
+  | "boleto"
+  | "cartao_credito"
+  | "transferencia"
+  | "dinheiro"
+  | "outro";
+
+export interface Order {
+  id: number;
+  supplier_id: number;
+  supplier_name: string;
+  order_date: string;
+  amount: number;
+  pairs_quantity: number;
+  has_invoice: boolean;
+  payment_method: PaymentMethod;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface PedidosSummary {
+  totalValor: number;
+  totalPares: number;
+  totalPedidos: number;
+}

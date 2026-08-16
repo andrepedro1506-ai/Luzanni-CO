@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Layout } from "./components/Layout";
 import { Login } from "./pages/Login";
 import { FluxoDeCaixa } from "./pages/FluxoDeCaixa";
+import { Pedidos } from "./pages/Pedidos";
+import { Fornecedores } from "./pages/Fornecedores";
 import { Relatorios } from "./pages/Relatorios";
 
 function Gate() {
@@ -24,6 +26,8 @@ function Gate() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<FluxoDeCaixa />} />
+        <Route path="/pedidos" element={<Pedidos />} />
+        <Route path="/fornecedores" element={<Fornecedores />} />
         <Route path="/relatorios" element={<Relatorios />} />
       </Route>
     </Routes>

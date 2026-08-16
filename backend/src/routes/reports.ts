@@ -9,6 +9,27 @@ function parseRange(query: Record<string, unknown>) {
   return { from, to };
 }
 
+reportsRouter.get("/pedidos", async (req, res) => {
+  const { from, to } = parseRange(req.query as Record<string, unknown>);
+
+  const result = await pool.query(
+    `SELECT COALESCE(SUM(amount), 0) as total_valor,
+            COALESCE(SUM(pairs_quantity), 0) as total_pares,
+            COUNT(*) as total_pedidos
+     FROM orders
+     WHERE order_date BETWEEN $1 AND $2`,
+    [from, to]
+  );
+
+  const row = result.rows[0] as { total_valor: string; total_pares: string; total_pedidos: string };
+
+  res.json({
+    totalValor: Number(row.total_valor),
+    totalPares: Number(row.total_pares),
+    totalPedidos: Number(row.total_pedidos),
+  });
+});
+
 reportsRouter.get("/summary", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
 

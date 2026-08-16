@@ -4,6 +4,8 @@ import {
   LayoutDashboard,
   Wallet,
   FileBarChart,
+  Building2,
+  ClipboardList,
   LogOut,
   X,
 } from "lucide-react";
@@ -11,6 +13,8 @@ import { useAuth } from "../context/AuthContext";
 
 const NAV_ITEMS = [
   { to: "/", label: "fluxo de caixa", icon: Wallet, end: true },
+  { to: "/pedidos", label: "pedidos", icon: ClipboardList },
+  { to: "/fornecedores", label: "fornecedores", icon: Building2 },
   { to: "/relatorios", label: "relatórios · dre", icon: FileBarChart },
 ];
 

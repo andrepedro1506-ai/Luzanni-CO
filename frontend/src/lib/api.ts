@@ -1,4 +1,4 @@
-import type { Category, Dre, Summary, Transaction } from "./types";
+import type { Category, Dre, Order, PedidosSummary, Summary, Supplier, Transaction } from "./types";
 import { supabase } from "./supabase";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
@@ -50,5 +50,22 @@ export const api = {
   reports: {
     summary: (range: Range) => request<Summary>(`/reports/summary${qs(range)}`),
     dre: (range: Range) => request<Dre>(`/reports/dre${qs(range)}`),
+    pedidos: (range: Range) => request<PedidosSummary>(`/reports/pedidos${qs(range)}`),
+  },
+  suppliers: {
+    list: () => request<Supplier[]>("/suppliers"),
+    create: (data: Partial<Supplier>) =>
+      request<Supplier>("/suppliers", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<Supplier>) =>
+      request<Supplier>(`/suppliers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (id: number) => request<void>(`/suppliers/${id}`, { method: "DELETE" }),
+  },
+  orders: {
+    list: (range?: Range) => request<Order[]>(`/orders${qs(range)}`),
+    create: (data: Partial<Order>) =>
+      request<Order>("/orders", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<Order>) =>
+      request<Order>(`/orders/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (id: number) => request<void>(`/orders/${id}`, { method: "DELETE" }),
   },
 };

@@ -5,6 +5,8 @@ import { Topbar } from "./Topbar";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": { title: "fluxo de caixa", subtitle: "entradas, saídas e saldo" },
+  "/pedidos": { title: "pedidos", subtitle: "pedidos aos fornecedores, em r$ e em pares" },
+  "/fornecedores": { title: "fornecedores", subtitle: "cadastro de fornecedores" },
   "/relatorios": { title: "relatórios · dre", subtitle: "demonstrativo de resultado" },
 };
 
