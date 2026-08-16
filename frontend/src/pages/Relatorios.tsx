@@ -7,6 +7,7 @@ import { StoreSelector } from "../components/StoreSelector";
 import { usePeriod } from "../hooks/usePeriod";
 import { api } from "../lib/api";
 import { formatCurrency, formatPercent } from "../lib/format";
+import { useChartColors } from "../lib/chartColors";
 import type { Dre } from "../lib/types";
 
 interface DreLine {
@@ -18,6 +19,7 @@ interface DreLine {
 
 export function Relatorios() {
   const { period, setPeriod, range } = usePeriod();
+  const chartColors = useChartColors();
   const [dre, setDre] = useState<Dre | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -116,10 +118,15 @@ export function Relatorios() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2a24" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#8b958f", fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: chartColors.tick, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
-                  tick={{ fill: "#8b958f", fontSize: 12 }}
+                  tick={{ fill: chartColors.tick, fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(v) => formatCurrency(v)}
@@ -128,14 +135,14 @@ export function Relatorios() {
                 <Tooltip
                   formatter={(value) => formatCurrency(Number(value))}
                   contentStyle={{
-                    background: "#111815",
-                    border: "1px solid #1f2a24",
+                    background: chartColors.tooltipBg,
+                    border: `1px solid ${chartColors.tooltipBorder}`,
                     borderRadius: 12,
-                    color: "#f5f7f6",
+                    color: chartColors.text,
                   }}
-                  cursor={{ fill: "#161f1b" }}
+                  cursor={{ fill: chartColors.cursor }}
                 />
-                <Bar dataKey="value" fill="#2dd4bf" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill={chartColors.primary} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

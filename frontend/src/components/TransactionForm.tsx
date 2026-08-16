@@ -110,7 +110,7 @@ export function TransactionForm({ categories, onClose, onSubmit }: TransactionFo
             }}
             className={`rounded-xl border px-4 py-2.5 text-sm font-semibold lowercase ${
               kind === "saida"
-                ? "border-danger bg-[#3a1414] text-danger"
+                ? "border-danger bg-danger-dim text-danger"
                 : "border-border text-text-secondary"
             }`}
           >

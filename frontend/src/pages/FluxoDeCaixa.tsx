@@ -11,10 +11,12 @@ import { StoreSelector } from "../components/StoreSelector";
 import { usePeriod } from "../hooks/usePeriod";
 import { api } from "../lib/api";
 import { formatCurrency, formatDate } from "../lib/format";
+import { useChartColors } from "../lib/chartColors";
 import type { Category, Summary, Transaction } from "../lib/types";
 
 export function FluxoDeCaixa() {
   const { period, setPeriod, range } = usePeriod();
+  const chartColors = useChartColors();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -118,10 +120,10 @@ export function FluxoDeCaixa() {
                   <Tooltip
                     formatter={(value) => formatCurrency(Number(value))}
                     contentStyle={{
-                      background: "#111815",
-                      border: "1px solid #1f2a24",
+                      background: chartColors.tooltipBg,
+                      border: `1px solid ${chartColors.tooltipBorder}`,
                       borderRadius: 12,
-                      color: "#f5f7f6",
+                      color: chartColors.text,
                     }}
                   />
                 </PieChart>

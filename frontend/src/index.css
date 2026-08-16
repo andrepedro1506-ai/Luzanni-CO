@@ -3,6 +3,39 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
+  --color-bg: #f5f7f1;
+  --color-surface: #ffffff;
+  --color-surface-hover: #eef1e8;
+  --color-border: #e1e6da;
+  --color-border-strong: #cdd5c3;
+
+  --color-text-primary: #14180f;
+  --color-text-secondary: #656f5c;
+  --color-text-muted: #97a08c;
+
+  --color-primary: #0d9488;
+  --color-primary-dim: #d8f0ec;
+  --color-on-primary: #04211c;
+
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-warning-dim: #fbe6c7;
+  --color-danger: #dc2626;
+  --color-danger-dim: #fbdada;
+
+  --color-chart-1: #d97706;
+  --color-chart-2: #dc2626;
+  --color-chart-3: #7c3aed;
+  --color-chart-4: #db2777;
+  --color-chart-5: #2563eb;
+  --color-chart-6: #0d9488;
+  --color-chart-7: #16a34a;
+
+  --radius-card: 16px;
+  --radius-pill: 999px;
+}
+
+.dark {
   --color-bg: #0a0f0d;
   --color-surface: #111815;
   --color-surface-hover: #161f1b;
@@ -15,10 +48,13 @@
 
   --color-primary: #2dd4bf;
   --color-primary-dim: #1a3d38;
+  --color-on-primary: #0a0f0d;
+
   --color-success: #22c55e;
   --color-warning: #f5a623;
   --color-warning-dim: #3a2c12;
   --color-danger: #ef4444;
+  --color-danger-dim: #3a1414;
 
   --color-chart-1: #f5a623;
   --color-chart-2: #ef4444;
@@ -27,13 +63,11 @@
   --color-chart-5: #3b82f6;
   --color-chart-6: #2dd4bf;
   --color-chart-7: #34d399;
-
-  --radius-card: 16px;
-  --radius-pill: 999px;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }

@@ -1,4 +1,5 @@
 import { PanelLeft, Search } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -21,9 +22,12 @@ export function Topbar({ onMenuClick, title, subtitle }: TopbarProps) {
           <h1 className="text-2xl font-bold lowercase">{title}</h1>
           <p className="text-sm text-text-secondary lowercase">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-text-secondary sm:min-w-72">
-          <Search className="size-4" />
-          <span className="text-sm">buscar...</span>
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-text-secondary sm:flex sm:min-w-56">
+            <Search className="size-4" />
+            <span className="text-sm">buscar...</span>
+          </div>
+          <ThemeToggle />
         </div>
       </div>
       <div className="px-4 pb-4 lg:hidden">

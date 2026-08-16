@@ -84,7 +84,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         <div className="flex items-center gap-3 border-t border-border px-4 py-4">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary font-bold text-bg">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary font-bold text-on-primary">
             {initial}
           </div>
           <div className="min-w-0 flex-1">

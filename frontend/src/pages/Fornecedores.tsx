@@ -64,12 +64,14 @@ export function Fornecedores() {
         {suppliers.map((s) => (
           <Card key={s.id} className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface-hover text-text-secondary">
                   <Building2 className="size-5" />
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{s.name}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold" title={s.name}>
+                    {s.name}
+                  </p>
                   {s.cnpj && <p className="truncate text-xs text-text-secondary">{s.cnpj}</p>}
                 </div>
               </div>

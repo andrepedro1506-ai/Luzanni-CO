@@ -90,7 +90,7 @@ export function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold lowercase text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold lowercase text-on-primary transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {submitting ? "entrando..." : "entrar no painel"}
             <ArrowRight className="size-4" />
