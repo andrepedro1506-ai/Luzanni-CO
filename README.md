@@ -5,14 +5,16 @@ Aplicativo de gestão financeira para a Luzanni (calçados femininos). Design in
 ## Estrutura
 
 - `frontend/` — React + Vite + TypeScript + Tailwind CSS
-- `backend/` — Express + SQLite (better-sqlite3)
+- `backend/` — Express + Postgres (Supabase)
+- `supabase/migrations/` — schema do banco (categorias, transações, RLS)
 
 ## Rodando localmente
 
-Backend (API na porta 3001):
+Backend (API na porta 3001). Copie `backend/.env.example` para `backend/.env` e preencha `DATABASE_URL` com a connection string do projeto Supabase (Project Settings → Database):
 
 ```bash
 cd backend
+cp .env.example .env
 npm install
 npm run dev
 ```

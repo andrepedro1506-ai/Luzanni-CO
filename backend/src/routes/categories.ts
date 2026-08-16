@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 
 export const categoriesRouter = Router();
 
@@ -18,21 +18,21 @@ const categorySchema = z.object({
   color: z.string().min(1).default("#2DD4BF"),
 });
 
-categoriesRouter.get("/", (_req, res) => {
-  const rows = db.prepare("SELECT * FROM categories ORDER BY name").all();
-  res.json(rows);
+categoriesRouter.get("/", async (_req, res) => {
+  const result = await pool.query("SELECT * FROM categories ORDER BY name");
+  res.json(result.rows);
 });
 
-categoriesRouter.post("/", (req, res) => {
+categoriesRouter.post("/", async (req, res) => {
   const parsed = categorySchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const { name, kind, dre_group, color } = parsed.data;
-  const info = db
-    .prepare("INSERT INTO categories (name, kind, dre_group, color) VALUES (?, ?, ?, ?)")
-    .run(name, kind, dre_group, color);
-  const row = db.prepare("SELECT * FROM categories WHERE id = ?").get(info.lastInsertRowid);
-  res.status(201).json(row);
+  const result = await pool.query(
+    "INSERT INTO categories (name, kind, dre_group, color) VALUES ($1, $2, $3, $4) RETURNING *",
+    [name, kind, dre_group, color]
+  );
+  res.status(201).json(result.rows[0]);
 });

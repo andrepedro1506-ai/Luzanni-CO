@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import "./db.js";
 import { transactionsRouter } from "./routes/transactions.js";
 import { categoriesRouter } from "./routes/categories.js";
 import { reportsRouter } from "./routes/reports.js";

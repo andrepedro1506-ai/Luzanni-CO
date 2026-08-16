@@ -3,10 +3,6 @@ dist/
 build/
 *.log
 
-backend/data.db
-backend/data.db-shm
-backend/data.db-wal
-
 .DS_Store
 .env
 .env.local

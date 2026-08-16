@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 
 export const transactionsRouter = Router();
 
@@ -14,85 +14,70 @@ const transactionSchema = z.object({
 });
 
 function parseRange(query: Record<string, unknown>) {
-  const from = typeof query.from === "string" ? query.from : "0000-01-01";
+  const from = typeof query.from === "string" ? query.from : "0001-01-01";
   const to = typeof query.to === "string" ? query.to : "9999-12-31";
   return { from, to };
 }
 
-transactionsRouter.get("/", (req, res) => {
+const SELECT_WITH_CATEGORY = `
+  SELECT t.*, c.name as category_name, c.color as category_color, c.dre_group
+  FROM transactions t
+  JOIN categories c ON c.id = t.category_id
+`;
+
+transactionsRouter.get("/", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
-  const rows = db
-    .prepare(
-      `SELECT t.*, c.name as category_name, c.color as category_color, c.dre_group
-       FROM transactions t
-       JOIN categories c ON c.id = t.category_id
-       WHERE t.date BETWEEN ? AND ?
-       ORDER BY t.date DESC, t.id DESC`
-    )
-    .all(from, to);
-  res.json(rows);
+  const result = await pool.query(
+    `${SELECT_WITH_CATEGORY} WHERE t.date BETWEEN $1 AND $2 ORDER BY t.date DESC, t.id DESC`,
+    [from, to]
+  );
+  res.json(result.rows);
 });
 
-transactionsRouter.post("/", (req, res) => {
+transactionsRouter.post("/", async (req, res) => {
   const parsed = transactionSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
   const { kind, description, amount, date, category_id, status } = parsed.data;
-  const info = db
-    .prepare(
-      `INSERT INTO transactions (kind, description, amount, date, category_id, status)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    )
-    .run(kind, description, amount, date, category_id, status);
-  const row = db
-    .prepare(
-      `SELECT t.*, c.name as category_name, c.color as category_color, c.dre_group
-       FROM transactions t JOIN categories c ON c.id = t.category_id WHERE t.id = ?`
-    )
-    .get(info.lastInsertRowid);
-  res.status(201).json(row);
+  const inserted = await pool.query(
+    `INSERT INTO transactions (kind, description, amount, date, category_id, status)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+    [kind, description, amount, date, category_id, status]
+  );
+  const result = await pool.query(`${SELECT_WITH_CATEGORY} WHERE t.id = $1`, [
+    inserted.rows[0].id,
+  ]);
+  res.status(201).json(result.rows[0]);
 });
 
-transactionsRouter.put("/:id", (req, res) => {
+transactionsRouter.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
   const parsed = transactionSchema.partial().safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
-  const existing = db.prepare("SELECT * FROM transactions WHERE id = ?").get(id);
-  if (!existing) {
+  const existing = await pool.query("SELECT * FROM transactions WHERE id = $1", [id]);
+  if (existing.rows.length === 0) {
     res.status(404).json({ error: "not found" });
     return;
   }
-  const merged = { ...existing, ...parsed.data };
-  db.prepare(
-    `UPDATE transactions SET kind = ?, description = ?, amount = ?, date = ?, category_id = ?, status = ?
-     WHERE id = ?`
-  ).run(
-    merged.kind,
-    merged.description,
-    merged.amount,
-    merged.date,
-    merged.category_id,
-    merged.status,
-    id
+  const merged = { ...existing.rows[0], ...parsed.data };
+  await pool.query(
+    `UPDATE transactions SET kind = $1, description = $2, amount = $3, date = $4, category_id = $5, status = $6
+     WHERE id = $7`,
+    [merged.kind, merged.description, merged.amount, merged.date, merged.category_id, merged.status, id]
   );
-  const row = db
-    .prepare(
-      `SELECT t.*, c.name as category_name, c.color as category_color, c.dre_group
-       FROM transactions t JOIN categories c ON c.id = t.category_id WHERE t.id = ?`
-    )
-    .get(id);
-  res.json(row);
+  const result = await pool.query(`${SELECT_WITH_CATEGORY} WHERE t.id = $1`, [id]);
+  res.json(result.rows[0]);
 });
 
-transactionsRouter.delete("/:id", (req, res) => {
+transactionsRouter.delete("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const info = db.prepare("DELETE FROM transactions WHERE id = ?").run(id);
-  if (info.changes === 0) {
+  const result = await pool.query("DELETE FROM transactions WHERE id = $1", [id]);
+  if (result.rowCount === 0) {
     res.status(404).json({ error: "not found" });
     return;
   }

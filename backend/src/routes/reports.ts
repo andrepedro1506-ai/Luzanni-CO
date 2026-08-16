@@ -1,60 +1,58 @@
 import { Router } from "express";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 
 export const reportsRouter = Router();
 
 function parseRange(query: Record<string, unknown>) {
-  const from = typeof query.from === "string" ? query.from : "0000-01-01";
+  const from = typeof query.from === "string" ? query.from : "0001-01-01";
   const to = typeof query.to === "string" ? query.to : "9999-12-31";
   return { from, to };
 }
 
-reportsRouter.get("/summary", (req, res) => {
+reportsRouter.get("/summary", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
 
-  const totals = db
-    .prepare(
-      `SELECT kind, status, COALESCE(SUM(amount), 0) as total
-       FROM transactions
-       WHERE date BETWEEN ? AND ?
-       GROUP BY kind, status`
-    )
-    .all(from, to) as Array<{ kind: string; status: string; total: number }>;
+  const totalsResult = await pool.query(
+    `SELECT kind, status, COALESCE(SUM(amount), 0) as total
+     FROM transactions
+     WHERE date BETWEEN $1 AND $2
+     GROUP BY kind, status`,
+    [from, to]
+  );
 
   let entradasPagas = 0;
   let saidasPagas = 0;
   let entradasPendentes = 0;
   let saidasPendentes = 0;
-  for (const t of totals) {
-    if (t.kind === "entrada" && t.status === "pago") entradasPagas = t.total;
-    if (t.kind === "saida" && t.status === "pago") saidasPagas = t.total;
-    if (t.kind === "entrada" && t.status === "pendente") entradasPendentes = t.total;
-    if (t.kind === "saida" && t.status === "pendente") saidasPendentes = t.total;
+  for (const t of totalsResult.rows as Array<{ kind: string; status: string; total: string }>) {
+    const total = Number(t.total);
+    if (t.kind === "entrada" && t.status === "pago") entradasPagas = total;
+    if (t.kind === "saida" && t.status === "pago") saidasPagas = total;
+    if (t.kind === "entrada" && t.status === "pendente") entradasPendentes = total;
+    if (t.kind === "saida" && t.status === "pendente") saidasPendentes = total;
   }
 
-  const porCategoria = db
-    .prepare(
-      `SELECT c.name as category_name, c.color as category_color, t.kind,
-              COALESCE(SUM(t.amount), 0) as total
-       FROM transactions t
-       JOIN categories c ON c.id = t.category_id
-       WHERE t.date BETWEEN ? AND ? AND t.status = 'pago'
-       GROUP BY c.id
-       ORDER BY total DESC`
-    )
-    .all(from, to);
+  const porCategoriaResult = await pool.query(
+    `SELECT c.name as category_name, c.color as category_color, t.kind,
+            COALESCE(SUM(t.amount), 0) as total
+     FROM transactions t
+     JOIN categories c ON c.id = t.category_id
+     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'
+     GROUP BY c.id, c.name, c.color, t.kind
+     ORDER BY total DESC`,
+    [from, to]
+  );
 
-  const porDia = db
-    .prepare(
-      `SELECT date,
-              COALESCE(SUM(CASE WHEN kind = 'entrada' AND status = 'pago' THEN amount ELSE 0 END), 0) as entradas,
-              COALESCE(SUM(CASE WHEN kind = 'saida' AND status = 'pago' THEN amount ELSE 0 END), 0) as saidas
-       FROM transactions
-       WHERE date BETWEEN ? AND ?
-       GROUP BY date
-       ORDER BY date ASC`
-    )
-    .all(from, to);
+  const porDiaResult = await pool.query(
+    `SELECT date,
+            COALESCE(SUM(CASE WHEN kind = 'entrada' AND status = 'pago' THEN amount ELSE 0 END), 0) as entradas,
+            COALESCE(SUM(CASE WHEN kind = 'saida' AND status = 'pago' THEN amount ELSE 0 END), 0) as saidas
+     FROM transactions
+     WHERE date BETWEEN $1 AND $2
+     GROUP BY date
+     ORDER BY date ASC`,
+    [from, to]
+  );
 
   res.json({
     entradas: entradasPagas,
@@ -62,23 +60,26 @@ reportsRouter.get("/summary", (req, res) => {
     saldo: entradasPagas - saidasPagas,
     aReceber: entradasPendentes,
     aPagar: saidasPendentes,
-    porCategoria,
-    porDia,
+    porCategoria: porCategoriaResult.rows.map((r) => ({ ...r, total: Number(r.total) })),
+    porDia: porDiaResult.rows.map((r) => ({
+      ...r,
+      entradas: Number(r.entradas),
+      saidas: Number(r.saidas),
+    })),
   });
 });
 
-reportsRouter.get("/dre", (req, res) => {
+reportsRouter.get("/dre", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
 
-  const groups = db
-    .prepare(
-      `SELECT c.dre_group, COALESCE(SUM(t.amount), 0) as total
-       FROM transactions t
-       JOIN categories c ON c.id = t.category_id
-       WHERE t.date BETWEEN ? AND ? AND t.status = 'pago'
-       GROUP BY c.dre_group`
-    )
-    .all(from, to) as Array<{ dre_group: string; total: number }>;
+  const result = await pool.query(
+    `SELECT c.dre_group, COALESCE(SUM(t.amount), 0) as total
+     FROM transactions t
+     JOIN categories c ON c.id = t.category_id
+     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'
+     GROUP BY c.dre_group`,
+    [from, to]
+  );
 
   const byGroup: Record<string, number> = {
     receita: 0,
@@ -88,7 +89,9 @@ reportsRouter.get("/dre", (req, res) => {
     despesas_financeiras: 0,
     receitas_financeiras: 0,
   };
-  for (const g of groups) byGroup[g.dre_group] = g.total;
+  for (const g of result.rows as Array<{ dre_group: string; total: string }>) {
+    byGroup[g.dre_group] = Number(g.total);
+  }
 
   const receitaBruta = byGroup.receita;
   const receitaLiquida = receitaBruta - byGroup.deducoes;
