@@ -53,6 +53,7 @@ transactionsRouter.get("/", async (req, res) => {
 transactionsRouter.post("/", async (req, res) => {
   const parsed = transactionSchema.safeParse(req.body);
   if (!parsed.success) {
+    console.error("POST /api/transactions validation failed:", JSON.stringify(req.body), parsed.error.flatten());
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
