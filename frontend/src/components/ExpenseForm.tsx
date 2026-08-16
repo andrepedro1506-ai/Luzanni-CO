@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "./ui/Button";
-import type { ExpenseGroup, Status } from "../lib/types";
+import type { ExpenseGroup, Kind, Status } from "../lib/types";
 import { todayIso } from "../lib/format";
 import { useStore } from "../context/StoreContext";
 
@@ -10,6 +10,7 @@ interface ExpenseFormProps {
   initialGroupId?: number;
   onClose: () => void;
   onSubmit: (data: {
+    kind: Kind;
     description: string;
     amount: number;
     date: string;
@@ -87,6 +88,7 @@ export function ExpenseForm({ groups, initialGroupId, onClose, onSubmit }: Expen
     setSubmitting(true);
     try {
       await onSubmit({
+        kind: "saida",
         description: description.trim(),
         amount: parsedAmount,
         date,
