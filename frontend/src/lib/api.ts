@@ -1,11 +1,19 @@
 import type { Category, Dre, Summary, Transaction } from "./types";
+import { supabase } from "./supabase";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 const BASE = `${API_URL}/api`;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
     ...init,
   });
   if (!res.ok) {

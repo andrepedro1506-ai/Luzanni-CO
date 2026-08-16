@@ -7,6 +7,7 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const NAV_ITEMS = [
   { to: "/", label: "fluxo de caixa", icon: Wallet, end: true },
@@ -19,6 +20,10 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
+  const { session, signOut } = useAuth();
+  const email = session?.user.email ?? "";
+  const initial = email.charAt(0).toUpperCase() || "L";
+
   return (
     <>
       {open && (
@@ -76,13 +81,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <div className="flex items-center gap-3 border-t border-border px-4 py-4">
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary font-bold text-bg">
-            L
+            {initial}
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold">Luzanni</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{email || "Luzanni"}</p>
             <p className="text-xs text-text-secondary">diretoria</p>
           </div>
-          <LogOut className="size-4 text-text-secondary" />
+          <button onClick={signOut} aria-label="sair" title="sair">
+            <LogOut className="size-4 text-text-secondary hover:text-text-primary" />
+          </button>
         </div>
       </aside>
     </>
