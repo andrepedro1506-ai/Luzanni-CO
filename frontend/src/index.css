@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #0a0f0d;
+  --color-surface: #111815;
+  --color-surface-hover: #161f1b;
+  --color-border: #1f2a24;
+  --color-border-strong: #2a3630;
+
+  --color-text-primary: #f5f7f6;
+  --color-text-secondary: #8b958f;
+  --color-text-muted: #5c655f;
+
+  --color-primary: #2dd4bf;
+  --color-primary-dim: #1a3d38;
+  --color-success: #22c55e;
+  --color-warning: #f5a623;
+  --color-warning-dim: #3a2c12;
+  --color-danger: #ef4444;
+
+  --color-chart-1: #f5a623;
+  --color-chart-2: #ef4444;
+  --color-chart-3: #9b6fff;
+  --color-chart-4: #ff4fa3;
+  --color-chart-5: #3b82f6;
+  --color-chart-6: #2dd4bf;
+  --color-chart-7: #34d399;
+
+  --radius-card: 16px;
+  --radius-pill: 999px;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
