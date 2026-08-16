@@ -7,6 +7,7 @@ import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { StatCard } from "../components/StatCard";
 import { TransactionForm } from "../components/TransactionForm";
+import { StoreSelector } from "../components/StoreSelector";
 import { usePeriod } from "../hooks/usePeriod";
 import { api } from "../lib/api";
 import { formatCurrency, formatDate } from "../lib/format";
@@ -56,15 +57,18 @@ export function FluxoDeCaixa() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PillGroup
-          value={period}
-          onChange={setPeriod}
-          options={[
-            { value: "hoje", label: "hoje" },
-            { value: "7dias", label: "7 dias" },
-            { value: "mes", label: "mês" },
-          ]}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <StoreSelector />
+          <PillGroup
+            value={period}
+            onChange={setPeriod}
+            options={[
+              { value: "hoje", label: "hoje" },
+              { value: "7dias", label: "7 dias" },
+              { value: "mes", label: "mês" },
+            ]}
+          />
+        </div>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="size-4" />
           nova transação

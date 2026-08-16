@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { StoreProvider } from "./context/StoreContext";
 import { Layout } from "./components/Layout";
 import { Login } from "./pages/Login";
 import { FluxoDeCaixa } from "./pages/FluxoDeCaixa";
@@ -23,14 +24,16 @@ function Gate() {
   }
 
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<FluxoDeCaixa />} />
-        <Route path="/pedidos" element={<Pedidos />} />
-        <Route path="/fornecedores" element={<Fornecedores />} />
-        <Route path="/relatorios" element={<Relatorios />} />
-      </Route>
-    </Routes>
+    <StoreProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<FluxoDeCaixa />} />
+          <Route path="/pedidos" element={<Pedidos />} />
+          <Route path="/fornecedores" element={<Fornecedores />} />
+          <Route path="/relatorios" element={<Relatorios />} />
+        </Route>
+      </Routes>
+    </StoreProvider>
   );
 }
 

@@ -1,4 +1,4 @@
-import type { Category, Dre, Order, PedidosSummary, Summary, Supplier, Transaction } from "./types";
+import type { Category, Dre, Order, PedidosSummary, Store, Summary, Supplier, Transaction } from "./types";
 import { supabase } from "./supabase";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
@@ -27,17 +27,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export interface Range {
   from: string;
   to: string;
+  storeId?: number | null;
 }
 
 function qs(range?: Range) {
   if (!range) return "";
   const params = new URLSearchParams({ from: range.from, to: range.to });
+  if (range.storeId) params.set("store_id", String(range.storeId));
   return `?${params.toString()}`;
 }
 
 export const api = {
   categories: {
     list: () => request<Category[]>("/categories"),
+  },
+  stores: {
+    list: () => request<Store[]>("/stores"),
   },
   transactions: {
     list: (range?: Range) => request<Transaction[]>(`/transactions${qs(range)}`),

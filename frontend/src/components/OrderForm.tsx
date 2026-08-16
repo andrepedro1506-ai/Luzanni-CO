@@ -4,6 +4,7 @@ import { Button } from "./ui/Button";
 import type { PaymentMethod, Supplier } from "../lib/types";
 import { PAYMENT_METHOD_LABELS, PAYMENT_METHOD_OPTIONS } from "../lib/paymentMethods";
 import { todayIso } from "../lib/format";
+import { useStore } from "../context/StoreContext";
 
 interface OrderFormProps {
   suppliers: Supplier[];
@@ -16,11 +17,14 @@ interface OrderFormProps {
     has_invoice: boolean;
     payment_method: PaymentMethod;
     notes?: string;
+    store_id: number;
   }) => Promise<void>;
 }
 
 export function OrderForm({ suppliers, onClose, onSubmit }: OrderFormProps) {
+  const { stores, selectedStoreId } = useStore();
   const [supplierId, setSupplierId] = useState<number | null>(suppliers[0]?.id ?? null);
+  const [storeId, setStoreId] = useState<number | null>(selectedStoreId ?? stores[0]?.id ?? null);
   const [orderDate, setOrderDate] = useState(todayIso());
   const [amount, setAmount] = useState("");
   const [pairsQuantity, setPairsQuantity] = useState("");
@@ -29,6 +33,8 @@ export function OrderForm({ suppliers, onClose, onSubmit }: OrderFormProps) {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const effectiveStoreId = storeId ?? selectedStoreId ?? stores[0]?.id ?? null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +55,10 @@ export function OrderForm({ suppliers, onClose, onSubmit }: OrderFormProps) {
       setError("informe a quantidade de pares");
       return;
     }
+    if (!effectiveStoreId) {
+      setError("selecione uma loja");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -60,6 +70,7 @@ export function OrderForm({ suppliers, onClose, onSubmit }: OrderFormProps) {
         has_invoice: hasInvoice,
         payment_method: paymentMethod,
         notes: notes.trim() || undefined,
+        store_id: effectiveStoreId,
       });
       onClose();
     } catch {
@@ -106,6 +117,21 @@ export function OrderForm({ suppliers, onClose, onSubmit }: OrderFormProps) {
         </div>
 
         <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-xs lowercase text-text-secondary">loja</label>
+            <select
+              value={effectiveStoreId ?? ""}
+              onChange={(e) => setStoreId(Number(e.target.value))}
+              className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-primary"
+            >
+              {stores.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="mb-1 block text-xs lowercase text-text-secondary">fornecedor</label>
             <select

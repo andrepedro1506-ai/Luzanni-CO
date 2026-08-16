@@ -9,16 +9,30 @@ function parseRange(query: Record<string, unknown>) {
   return { from, to };
 }
 
+function parseStoreId(query: Record<string, unknown>) {
+  const raw = query.store_id;
+  if (typeof raw !== "string" || raw === "") return null;
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 reportsRouter.get("/pedidos", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [from, to];
+  let where = "WHERE order_date BETWEEN $1 AND $2";
+  if (storeId) {
+    params.push(storeId);
+    where += ` AND store_id = $${params.length}`;
+  }
 
   const result = await pool.query(
     `SELECT COALESCE(SUM(amount), 0) as total_valor,
             COALESCE(SUM(pairs_quantity), 0) as total_pares,
             COUNT(*) as total_pedidos
      FROM orders
-     WHERE order_date BETWEEN $1 AND $2`,
-    [from, to]
+     ${where}`,
+    params
   );
 
   const row = result.rows[0] as { total_valor: string; total_pares: string; total_pedidos: string };
@@ -32,13 +46,20 @@ reportsRouter.get("/pedidos", async (req, res) => {
 
 reportsRouter.get("/summary", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [from, to];
+  let storeFilter = "";
+  if (storeId) {
+    params.push(storeId);
+    storeFilter = ` AND store_id = $${params.length}`;
+  }
 
   const totalsResult = await pool.query(
     `SELECT kind, status, COALESCE(SUM(amount), 0) as total
      FROM transactions
-     WHERE date BETWEEN $1 AND $2
+     WHERE date BETWEEN $1 AND $2${storeFilter}
      GROUP BY kind, status`,
-    [from, to]
+    params
   );
 
   let entradasPagas = 0;
@@ -53,15 +74,16 @@ reportsRouter.get("/summary", async (req, res) => {
     if (t.kind === "saida" && t.status === "pendente") saidasPendentes = total;
   }
 
+  const porCategoriaStoreFilter = storeId ? ` AND t.store_id = $${params.length}` : "";
   const porCategoriaResult = await pool.query(
     `SELECT c.name as category_name, c.color as category_color, t.kind,
             COALESCE(SUM(t.amount), 0) as total
      FROM transactions t
      JOIN categories c ON c.id = t.category_id
-     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'
+     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'${porCategoriaStoreFilter}
      GROUP BY c.id, c.name, c.color, t.kind
      ORDER BY total DESC`,
-    [from, to]
+    params
   );
 
   const porDiaResult = await pool.query(
@@ -69,10 +91,10 @@ reportsRouter.get("/summary", async (req, res) => {
             COALESCE(SUM(CASE WHEN kind = 'entrada' AND status = 'pago' THEN amount ELSE 0 END), 0) as entradas,
             COALESCE(SUM(CASE WHEN kind = 'saida' AND status = 'pago' THEN amount ELSE 0 END), 0) as saidas
      FROM transactions
-     WHERE date BETWEEN $1 AND $2
+     WHERE date BETWEEN $1 AND $2${storeFilter}
      GROUP BY date
      ORDER BY date ASC`,
-    [from, to]
+    params
   );
 
   res.json({
@@ -92,14 +114,21 @@ reportsRouter.get("/summary", async (req, res) => {
 
 reportsRouter.get("/dre", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [from, to];
+  let storeFilter = "";
+  if (storeId) {
+    params.push(storeId);
+    storeFilter = ` AND t.store_id = $${params.length}`;
+  }
 
   const result = await pool.query(
     `SELECT c.dre_group, COALESCE(SUM(t.amount), 0) as total
      FROM transactions t
      JOIN categories c ON c.id = t.category_id
-     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'
+     WHERE t.date BETWEEN $1 AND $2 AND t.status = 'pago'${storeFilter}
      GROUP BY c.dre_group`,
-    [from, to]
+    params
   );
 
   const byGroup: Record<string, number> = {

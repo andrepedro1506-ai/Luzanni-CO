@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Button } from "./ui/Button";
 import type { Category, Kind, Status } from "../lib/types";
 import { todayIso } from "../lib/format";
+import { useStore } from "../context/StoreContext";
 
 interface TransactionFormProps {
   categories: Category[];
@@ -14,21 +15,25 @@ interface TransactionFormProps {
     date: string;
     category_id: number;
     status: Status;
+    store_id: number;
   }) => Promise<void>;
 }
 
 export function TransactionForm({ categories, onClose, onSubmit }: TransactionFormProps) {
+  const { stores, selectedStoreId } = useStore();
   const [kind, setKind] = useState<Kind>("entrada");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayIso());
   const [status, setStatus] = useState<Status>("pago");
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [storeId, setStoreId] = useState<number | null>(selectedStoreId ?? stores[0]?.id ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const filteredCategories = categories.filter((c) => c.kind === kind);
   const effectiveCategoryId = categoryId ?? filteredCategories[0]?.id ?? null;
+  const effectiveStoreId = storeId ?? selectedStoreId ?? stores[0]?.id ?? null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,6 +51,10 @@ export function TransactionForm({ categories, onClose, onSubmit }: TransactionFo
       setError("selecione uma categoria");
       return;
     }
+    if (!effectiveStoreId) {
+      setError("selecione uma loja");
+      return;
+    }
     setSubmitting(true);
     try {
       await onSubmit({
@@ -55,6 +64,7 @@ export function TransactionForm({ categories, onClose, onSubmit }: TransactionFo
         date,
         category_id: effectiveCategoryId,
         status,
+        store_id: effectiveStoreId,
       });
       onClose();
     } catch {
@@ -139,6 +149,21 @@ export function TransactionForm({ categories, onClose, onSubmit }: TransactionFo
                 className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs lowercase text-text-secondary">loja</label>
+            <select
+              value={effectiveStoreId ?? ""}
+              onChange={(e) => setStoreId(Number(e.target.value))}
+              className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-primary"
+            >
+              {stores.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

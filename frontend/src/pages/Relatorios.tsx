@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { Card } from "../components/ui/Card";
 import { PillGroup } from "../components/ui/Pill";
 import { ProgressBar } from "../components/ui/ProgressBar";
+import { StoreSelector } from "../components/StoreSelector";
 import { usePeriod } from "../hooks/usePeriod";
 import { api } from "../lib/api";
 import { formatCurrency, formatPercent } from "../lib/format";
@@ -53,15 +54,18 @@ export function Relatorios() {
 
   return (
     <div className="space-y-6">
-      <PillGroup
-        value={period}
-        onChange={setPeriod}
-        options={[
-          { value: "hoje", label: "hoje" },
-          { value: "7dias", label: "7 dias" },
-          { value: "mes", label: "mês" },
-        ]}
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <StoreSelector />
+        <PillGroup
+          value={period}
+          onChange={setPeriod}
+          options={[
+            { value: "hoje", label: "hoje" },
+            { value: "7dias", label: "7 dias" },
+            { value: "mes", label: "mês" },
+          ]}
+        />
+      </div>
 
       <Card>
         <p className="text-sm lowercase text-text-secondary">lucro líquido do período</p>

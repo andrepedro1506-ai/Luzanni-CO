@@ -27,7 +27,14 @@ export interface Transaction {
   category_color: string;
   dre_group: DreGroup;
   status: Status;
+  store_id: number;
   created_at: string;
+}
+
+export interface Store {
+  id: number;
+  name: string;
+  slug: string;
 }
 
 export interface Summary {
@@ -85,6 +92,7 @@ export interface Order {
   has_invoice: boolean;
   payment_method: PaymentMethod;
   notes: string | null;
+  store_id: number;
   created_at: string;
 }
 

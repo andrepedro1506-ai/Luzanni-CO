@@ -11,12 +11,20 @@ const transactionSchema = z.object({
   date: z.string().min(1),
   category_id: z.number().int().positive(),
   status: z.enum(["pago", "pendente"]).default("pago"),
+  store_id: z.number().int().positive(),
 });
 
 function parseRange(query: Record<string, unknown>) {
   const from = typeof query.from === "string" ? query.from : "0001-01-01";
   const to = typeof query.to === "string" ? query.to : "9999-12-31";
   return { from, to };
+}
+
+function parseStoreId(query: Record<string, unknown>) {
+  const raw = query.store_id;
+  if (typeof raw !== "string" || raw === "") return null;
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
 const SELECT_WITH_CATEGORY = `
@@ -27,9 +35,16 @@ const SELECT_WITH_CATEGORY = `
 
 transactionsRouter.get("/", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [from, to];
+  let where = "WHERE t.date BETWEEN $1 AND $2";
+  if (storeId) {
+    params.push(storeId);
+    where += ` AND t.store_id = $${params.length}`;
+  }
   const result = await pool.query(
-    `${SELECT_WITH_CATEGORY} WHERE t.date BETWEEN $1 AND $2 ORDER BY t.date DESC, t.id DESC`,
-    [from, to]
+    `${SELECT_WITH_CATEGORY} ${where} ORDER BY t.date DESC, t.id DESC`,
+    params
   );
   res.json(result.rows);
 });
@@ -40,11 +55,11 @@ transactionsRouter.post("/", async (req, res) => {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
-  const { kind, description, amount, date, category_id, status } = parsed.data;
+  const { kind, description, amount, date, category_id, status, store_id } = parsed.data;
   const inserted = await pool.query(
-    `INSERT INTO transactions (kind, description, amount, date, category_id, status)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-    [kind, description, amount, date, category_id, status]
+    `INSERT INTO transactions (kind, description, amount, date, category_id, status, store_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+    [kind, description, amount, date, category_id, status, store_id]
   );
   const result = await pool.query(`${SELECT_WITH_CATEGORY} WHERE t.id = $1`, [
     inserted.rows[0].id,
@@ -66,9 +81,18 @@ transactionsRouter.put("/:id", async (req, res) => {
   }
   const merged = { ...existing.rows[0], ...parsed.data };
   await pool.query(
-    `UPDATE transactions SET kind = $1, description = $2, amount = $3, date = $4, category_id = $5, status = $6
-     WHERE id = $7`,
-    [merged.kind, merged.description, merged.amount, merged.date, merged.category_id, merged.status, id]
+    `UPDATE transactions SET kind = $1, description = $2, amount = $3, date = $4, category_id = $5, status = $6, store_id = $7
+     WHERE id = $8`,
+    [
+      merged.kind,
+      merged.description,
+      merged.amount,
+      merged.date,
+      merged.category_id,
+      merged.status,
+      merged.store_id,
+      id,
+    ]
   );
   const result = await pool.query(`${SELECT_WITH_CATEGORY} WHERE t.id = $1`, [id]);
   res.json(result.rows[0]);
