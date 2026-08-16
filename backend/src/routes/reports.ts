@@ -16,6 +16,41 @@ function parseStoreId(query: Record<string, unknown>) {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
+reportsRouter.get("/despesas-por-grupo", async (req, res) => {
+  const { from, to } = parseRange(req.query as Record<string, unknown>);
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [from, to];
+  let storeFilter = "";
+  if (storeId) {
+    params.push(storeId);
+    storeFilter = ` AND t.store_id = $${params.length}`;
+  }
+
+  const result = await pool.query(
+    `SELECT COALESCE(eg.id, 0) as group_id,
+            COALESCE(eg.name, 'outras despesas') as group_name,
+            COALESCE(eg.color, '#97A08C') as group_color,
+            COALESCE(SUM(t.amount), 0) as total
+     FROM transactions t
+     LEFT JOIN expense_groups eg ON eg.id = t.expense_group_id
+     WHERE t.kind = 'saida' AND t.status = 'pago' AND t.date BETWEEN $1 AND $2${storeFilter}
+     GROUP BY eg.id, eg.name, eg.color
+     ORDER BY total DESC`,
+    params
+  );
+
+  const groups = result.rows.map((r) => ({
+    groupId: Number(r.group_id),
+    groupName: r.group_name as string,
+    groupColor: r.group_color as string,
+    total: Number(r.total),
+  }));
+
+  const total = groups.reduce((sum, g) => sum + g.total, 0);
+
+  res.json({ groups, total });
+});
+
 reportsRouter.get("/pedidos", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
   const storeId = parseStoreId(req.query as Record<string, unknown>);

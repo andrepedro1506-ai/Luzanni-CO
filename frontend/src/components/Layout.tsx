@@ -5,6 +5,8 @@ import { Topbar } from "./Topbar";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": { title: "fluxo de caixa", subtitle: "entradas, saídas e saldo" },
+  "/financeiro": { title: "financeiro", subtitle: "despesas por grupo" },
+  "/grupos-despesas": { title: "grupos de despesas", subtitle: "cadastro de grupos" },
   "/pedidos": { title: "pedidos", subtitle: "pedidos aos fornecedores, em r$ e em pares" },
   "/fornecedores": { title: "fornecedores", subtitle: "cadastro de fornecedores" },
   "/relatorios": { title: "relatórios · dre", subtitle: "demonstrativo de resultado" },

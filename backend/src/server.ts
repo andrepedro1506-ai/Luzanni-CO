@@ -7,6 +7,7 @@ import { reportsRouter } from "./routes/reports.js";
 import { suppliersRouter } from "./routes/suppliers.js";
 import { ordersRouter } from "./routes/orders.js";
 import { storesRouter } from "./routes/stores.js";
+import { expenseGroupsRouter } from "./routes/expenseGroups.js";
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,7 @@ app.use("/api/reports", requireAuth, reportsRouter);
 app.use("/api/suppliers", requireAuth, suppliersRouter);
 app.use("/api/orders", requireAuth, ordersRouter);
 app.use("/api/stores", requireAuth, storesRouter);
+app.use("/api/expense-groups", requireAuth, expenseGroupsRouter);
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 app.listen(PORT, () => {

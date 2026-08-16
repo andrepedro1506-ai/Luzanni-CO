@@ -5,6 +5,8 @@ import { StoreProvider } from "./context/StoreContext";
 import { Layout } from "./components/Layout";
 import { Login } from "./pages/Login";
 import { FluxoDeCaixa } from "./pages/FluxoDeCaixa";
+import { Financeiro } from "./pages/Financeiro";
+import { GruposDespesas } from "./pages/GruposDespesas";
 import { Pedidos } from "./pages/Pedidos";
 import { Fornecedores } from "./pages/Fornecedores";
 import { Relatorios } from "./pages/Relatorios";
@@ -29,6 +31,8 @@ function Gate() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<FluxoDeCaixa />} />
+          <Route path="/financeiro" element={<Financeiro />} />
+          <Route path="/grupos-despesas" element={<GruposDespesas />} />
           <Route path="/pedidos" element={<Pedidos />} />
           <Route path="/fornecedores" element={<Fornecedores />} />
           <Route path="/relatorios" element={<Relatorios />} />

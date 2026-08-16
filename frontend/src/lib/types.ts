@@ -28,7 +28,21 @@ export interface Transaction {
   dre_group: DreGroup;
   status: Status;
   store_id: number;
+  expense_group_id: number | null;
   created_at: string;
+}
+
+export interface ExpenseGroup {
+  id: number;
+  name: string;
+  color: string;
+  category_id: number;
+  dre_group: DreGroup;
+}
+
+export interface DespesasPorGrupo {
+  groups: Array<{ groupId: number; groupName: string; groupColor: string; total: number }>;
+  total: number;
 }
 
 export interface Store {

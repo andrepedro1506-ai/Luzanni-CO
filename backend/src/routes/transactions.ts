@@ -12,6 +12,7 @@ const transactionSchema = z.object({
   category_id: z.number().int().positive(),
   status: z.enum(["pago", "pendente"]).default("pago"),
   store_id: z.number().int().positive(),
+  expense_group_id: z.number().int().positive().nullable().optional(),
 });
 
 function parseRange(query: Record<string, unknown>) {
@@ -55,11 +56,12 @@ transactionsRouter.post("/", async (req, res) => {
     res.status(400).json({ error: parsed.error.flatten() });
     return;
   }
-  const { kind, description, amount, date, category_id, status, store_id } = parsed.data;
+  const { kind, description, amount, date, category_id, status, store_id, expense_group_id } =
+    parsed.data;
   const inserted = await pool.query(
-    `INSERT INTO transactions (kind, description, amount, date, category_id, status, store_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-    [kind, description, amount, date, category_id, status, store_id]
+    `INSERT INTO transactions (kind, description, amount, date, category_id, status, store_id, expense_group_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+    [kind, description, amount, date, category_id, status, store_id, expense_group_id ?? null]
   );
   const result = await pool.query(`${SELECT_WITH_CATEGORY} WHERE t.id = $1`, [
     inserted.rows[0].id,
@@ -81,8 +83,8 @@ transactionsRouter.put("/:id", async (req, res) => {
   }
   const merged = { ...existing.rows[0], ...parsed.data };
   await pool.query(
-    `UPDATE transactions SET kind = $1, description = $2, amount = $3, date = $4, category_id = $5, status = $6, store_id = $7
-     WHERE id = $8`,
+    `UPDATE transactions SET kind = $1, description = $2, amount = $3, date = $4, category_id = $5, status = $6, store_id = $7, expense_group_id = $8
+     WHERE id = $9`,
     [
       merged.kind,
       merged.description,
@@ -91,6 +93,7 @@ transactionsRouter.put("/:id", async (req, res) => {
       merged.category_id,
       merged.status,
       merged.store_id,
+      merged.expense_group_id ?? null,
       id,
     ]
   );

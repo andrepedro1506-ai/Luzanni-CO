@@ -1,4 +1,15 @@
-import type { Category, Dre, Order, PedidosSummary, Store, Summary, Supplier, Transaction } from "./types";
+import type {
+  Category,
+  DespesasPorGrupo,
+  Dre,
+  ExpenseGroup,
+  Order,
+  PedidosSummary,
+  Store,
+  Summary,
+  Supplier,
+  Transaction,
+} from "./types";
 import { supabase } from "./supabase";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
@@ -56,6 +67,14 @@ export const api = {
     summary: (range: Range) => request<Summary>(`/reports/summary${qs(range)}`),
     dre: (range: Range) => request<Dre>(`/reports/dre${qs(range)}`),
     pedidos: (range: Range) => request<PedidosSummary>(`/reports/pedidos${qs(range)}`),
+    despesasPorGrupo: (range: Range) =>
+      request<DespesasPorGrupo>(`/reports/despesas-por-grupo${qs(range)}`),
+  },
+  expenseGroups: {
+    list: () => request<ExpenseGroup[]>("/expense-groups"),
+    create: (data: { name: string; color?: string }) =>
+      request<ExpenseGroup>("/expense-groups", { method: "POST", body: JSON.stringify(data) }),
+    remove: (id: number) => request<void>(`/expense-groups/${id}`, { method: "DELETE" }),
   },
   suppliers: {
     list: () => request<Supplier[]>("/suppliers"),
