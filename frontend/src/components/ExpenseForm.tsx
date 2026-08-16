@@ -7,6 +7,7 @@ import { useStore } from "../context/StoreContext";
 
 interface ExpenseFormProps {
   groups: ExpenseGroup[];
+  initialGroupId?: number;
   onClose: () => void;
   onSubmit: (data: {
     description: string;
@@ -19,9 +20,9 @@ interface ExpenseFormProps {
   }) => Promise<void>;
 }
 
-export function ExpenseForm({ groups, onClose, onSubmit }: ExpenseFormProps) {
+export function ExpenseForm({ groups, initialGroupId, onClose, onSubmit }: ExpenseFormProps) {
   const { stores, selectedStoreId } = useStore();
-  const [groupId, setGroupId] = useState<number | null>(groups[0]?.id ?? null);
+  const [groupId, setGroupId] = useState<number | null>(initialGroupId ?? groups[0]?.id ?? null);
   const [storeId, setStoreId] = useState<number | null>(selectedStoreId ?? stores[0]?.id ?? null);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");

@@ -30,7 +30,8 @@ reportsRouter.get("/despesas-por-grupo", async (req, res) => {
     `SELECT COALESCE(eg.id, 0) as group_id,
             COALESCE(eg.name, 'outras despesas') as group_name,
             COALESCE(eg.color, '#97A08C') as group_color,
-            COALESCE(SUM(t.amount), 0) as total
+            COALESCE(SUM(t.amount), 0) as total,
+            COUNT(*) as count
      FROM transactions t
      LEFT JOIN expense_groups eg ON eg.id = t.expense_group_id
      WHERE t.kind = 'saida' AND t.status = 'pago' AND t.date BETWEEN $1 AND $2${storeFilter}
@@ -44,6 +45,7 @@ reportsRouter.get("/despesas-por-grupo", async (req, res) => {
     groupName: r.group_name as string,
     groupColor: r.group_color as string,
     total: Number(r.total),
+    count: Number(r.count),
   }));
 
   const total = groups.reduce((sum, g) => sum + g.total, 0);

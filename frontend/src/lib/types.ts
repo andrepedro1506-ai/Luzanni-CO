@@ -41,7 +41,13 @@ export interface ExpenseGroup {
 }
 
 export interface DespesasPorGrupo {
-  groups: Array<{ groupId: number; groupName: string; groupColor: string; total: number }>;
+  groups: Array<{
+    groupId: number;
+    groupName: string;
+    groupColor: string;
+    total: number;
+    count: number;
+  }>;
   total: number;
 }
 
