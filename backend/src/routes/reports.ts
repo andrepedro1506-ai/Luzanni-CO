@@ -53,6 +53,31 @@ reportsRouter.get("/despesas-por-grupo", async (req, res) => {
   res.json({ groups, total });
 });
 
+reportsRouter.get("/despesas-abertas", async (req, res) => {
+  const storeId = parseStoreId(req.query as Record<string, unknown>);
+  const params: unknown[] = [];
+  let storeFilter = "";
+  if (storeId) {
+    params.push(storeId);
+    storeFilter = ` AND store_id = $${params.length}`;
+  }
+
+  const result = await pool.query(
+    `SELECT
+       COALESCE(SUM(CASE WHEN date >= CURRENT_DATE THEN amount ELSE 0 END), 0) as a_vencer,
+       COALESCE(SUM(CASE WHEN date < CURRENT_DATE THEN amount ELSE 0 END), 0) as em_atraso
+     FROM transactions
+     WHERE kind = 'saida' AND status = 'pendente'${storeFilter}`,
+    params
+  );
+
+  const row = result.rows[0] as { a_vencer: string; em_atraso: string };
+  const aVencer = Number(row.a_vencer);
+  const emAtraso = Number(row.em_atraso);
+
+  res.json({ aVencer, emAtraso, emAberto: aVencer + emAtraso });
+});
+
 reportsRouter.get("/pedidos", async (req, res) => {
   const { from, to } = parseRange(req.query as Record<string, unknown>);
   const storeId = parseStoreId(req.query as Record<string, unknown>);

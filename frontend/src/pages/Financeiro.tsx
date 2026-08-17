@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Receipt } from "lucide-react";
+import { AlertTriangle, CalendarClock, Plus, Receipt, Trophy, Wallet } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import { PillGroup } from "../components/ui/Pill";
 import { Button } from "../components/ui/Button";
@@ -9,12 +9,14 @@ import { ExpenseForm } from "../components/ExpenseForm";
 import { ExpenseGroupCard } from "../components/ExpenseGroupCard";
 import { usePeriod } from "../hooks/usePeriod";
 import { api } from "../lib/api";
-import { formatCurrency } from "../lib/format";
-import type { DespesasPorGrupo, ExpenseGroup, Transaction } from "../lib/types";
+import { formatCurrency, startOfMonthIso, todayIso } from "../lib/format";
+import type { DespesasAbertas, DespesasPorGrupo, ExpenseGroup, Transaction } from "../lib/types";
 
 export function Financeiro() {
   const { period, setPeriod, range } = usePeriod();
   const [despesas, setDespesas] = useState<DespesasPorGrupo | null>(null);
+  const [despesasMes, setDespesasMes] = useState<DespesasPorGrupo | null>(null);
+  const [despesasAbertas, setDespesasAbertas] = useState<DespesasAbertas | null>(null);
   const [groups, setGroups] = useState<ExpenseGroup[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +25,21 @@ export function Financeiro() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [despesasData, groupsData, transactionsData] = await Promise.all([
-      api.reports.despesasPorGrupo(range),
-      api.expenseGroups.list(),
-      api.transactions.list(range),
-    ]);
+    const [despesasData, despesasMesData, despesasAbertasData, groupsData, transactionsData] =
+      await Promise.all([
+        api.reports.despesasPorGrupo(range),
+        api.reports.despesasPorGrupo({
+          from: startOfMonthIso(),
+          to: todayIso(),
+          storeId: range.storeId,
+        }),
+        api.reports.despesasAbertas(range.storeId),
+        api.expenseGroups.list(),
+        api.transactions.list(range),
+      ]);
     setDespesas(despesasData);
+    setDespesasMes(despesasMesData);
+    setDespesasAbertas(despesasAbertasData);
     setGroups(groupsData);
     setTransactions(transactionsData.filter((t) => t.expense_group_id !== null));
     setLoading(false);
@@ -74,12 +85,42 @@ export function Financeiro() {
         </Button>
       </div>
 
-      <StatCard
-        label="total de despesas no período"
-        value={despesas ? formatCurrency(despesas.total) : "—"}
-        icon={Receipt}
-        tone="danger"
-      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard
+          label="despesa do mês"
+          value={despesasMes ? formatCurrency(despesasMes.total) : "—"}
+          icon={Receipt}
+          tone="danger"
+        />
+        <StatCard
+          label="valor em aberto"
+          value={despesasAbertas ? formatCurrency(despesasAbertas.emAberto) : "—"}
+          icon={Wallet}
+          tone="warning"
+        />
+        <StatCard
+          label="a vencer"
+          value={despesasAbertas ? formatCurrency(despesasAbertas.aVencer) : "—"}
+          icon={CalendarClock}
+          tone="default"
+        />
+        <StatCard
+          label="em atraso"
+          value={despesasAbertas ? formatCurrency(despesasAbertas.emAtraso) : "—"}
+          icon={AlertTriangle}
+          tone="danger"
+        />
+        <StatCard
+          label="grupo com maior despesa"
+          value={
+            despesasMes?.groups[0]
+              ? `${despesasMes.groups[0].groupName} · ${formatCurrency(despesasMes.groups[0].total)}`
+              : "—"
+          }
+          icon={Trophy}
+          tone="default"
+        />
+      </div>
 
       {loading && <p className="text-sm text-text-secondary lowercase">carregando...</p>}
       {!loading && (!despesas || despesas.groups.length === 0) && (

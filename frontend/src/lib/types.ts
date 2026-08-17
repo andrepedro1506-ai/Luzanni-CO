@@ -51,6 +51,12 @@ export interface DespesasPorGrupo {
   total: number;
 }
 
+export interface DespesasAbertas {
+  aVencer: number;
+  emAtraso: number;
+  emAberto: number;
+}
+
 export interface Store {
   id: number;
   name: string;

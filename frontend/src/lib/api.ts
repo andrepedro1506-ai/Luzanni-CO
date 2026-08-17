@@ -1,5 +1,6 @@
 import type {
   Category,
+  DespesasAbertas,
   DespesasPorGrupo,
   Dre,
   ExpenseGroup,
@@ -69,6 +70,12 @@ export const api = {
     pedidos: (range: Range) => request<PedidosSummary>(`/reports/pedidos${qs(range)}`),
     despesasPorGrupo: (range: Range) =>
       request<DespesasPorGrupo>(`/reports/despesas-por-grupo${qs(range)}`),
+    despesasAbertas: (storeId?: number | null) => {
+      const params = new URLSearchParams();
+      if (storeId) params.set("store_id", String(storeId));
+      const query = params.toString();
+      return request<DespesasAbertas>(`/reports/despesas-abertas${query ? `?${query}` : ""}`);
+    },
   },
   expenseGroups: {
     list: () => request<ExpenseGroup[]>("/expense-groups"),
