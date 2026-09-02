@@ -1,5 +1,6 @@
 import type {
   Category,
+  Cheque,
   DespesasAbertas,
   DespesasPorGrupo,
   Dre,
@@ -98,5 +99,18 @@ export const api = {
     update: (id: number, data: Partial<Order>) =>
       request<Order>(`/orders/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     remove: (id: number) => request<void>(`/orders/${id}`, { method: "DELETE" }),
+  },
+  cheques: {
+    list: (storeId?: number | null) => {
+      const params = new URLSearchParams();
+      if (storeId) params.set("store_id", String(storeId));
+      const query = params.toString();
+      return request<Cheque[]>(`/cheques${query ? `?${query}` : ""}`);
+    },
+    create: (data: Partial<Cheque>) =>
+      request<Cheque>("/cheques", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<Cheque>) =>
+      request<Cheque>(`/cheques/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (id: number) => request<void>(`/cheques/${id}`, { method: "DELETE" }),
   },
 };

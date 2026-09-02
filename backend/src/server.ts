@@ -9,6 +9,7 @@ import { suppliersRouter } from "./routes/suppliers.js";
 import { ordersRouter } from "./routes/orders.js";
 import { storesRouter } from "./routes/stores.js";
 import { expenseGroupsRouter } from "./routes/expenseGroups.js";
+import { chequesRouter } from "./routes/cheques.js";
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,7 @@ app.use("/api/suppliers", requireAuth, suppliersRouter);
 app.use("/api/orders", requireAuth, ordersRouter);
 app.use("/api/stores", requireAuth, storesRouter);
 app.use("/api/expense-groups", requireAuth, expenseGroupsRouter);
+app.use("/api/cheques", requireAuth, chequesRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("Unhandled error:", err);

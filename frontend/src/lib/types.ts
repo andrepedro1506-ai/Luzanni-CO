@@ -127,3 +127,19 @@ export interface PedidosSummary {
   totalPares: number;
   totalPedidos: number;
 }
+
+export type ChequeKind = "recebido" | "emitido";
+export type ChequeStatus = "pendente" | "compensado" | "devolvido";
+
+export interface Cheque {
+  id: number;
+  kind: ChequeKind;
+  numero: string;
+  valor: number;
+  data_vencimento: string;
+  contraparte: string;
+  status: ChequeStatus;
+  store_id: number;
+  notes: string | null;
+  created_at: string;
+}

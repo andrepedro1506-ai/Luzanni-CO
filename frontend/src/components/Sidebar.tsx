@@ -7,6 +7,7 @@ import {
   Building2,
   ClipboardList,
   Receipt,
+  ReceiptText,
   Tags,
   LogOut,
   X,
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { to: "/financeiro", label: "financeiro", icon: Receipt },
   { to: "/grupos-despesas", label: "grupos de despesas", icon: Tags },
   { to: "/pedidos", label: "pedidos", icon: ClipboardList },
+  { to: "/cheques", label: "cheques", icon: ReceiptText },
   { to: "/fornecedores", label: "fornecedores", icon: Building2 },
   { to: "/relatorios", label: "relatórios · dre", icon: FileBarChart },
 ];

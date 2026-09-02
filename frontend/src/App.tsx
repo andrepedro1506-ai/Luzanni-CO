@@ -10,6 +10,7 @@ import { GruposDespesas } from "./pages/GruposDespesas";
 import { Pedidos } from "./pages/Pedidos";
 import { Fornecedores } from "./pages/Fornecedores";
 import { Relatorios } from "./pages/Relatorios";
+import { Cheques } from "./pages/Cheques";
 
 function Gate() {
   const { session, loading } = useAuth();
@@ -34,6 +35,7 @@ function Gate() {
           <Route path="/financeiro" element={<Financeiro />} />
           <Route path="/grupos-despesas" element={<GruposDespesas />} />
           <Route path="/pedidos" element={<Pedidos />} />
+          <Route path="/cheques" element={<Cheques />} />
           <Route path="/fornecedores" element={<Fornecedores />} />
           <Route path="/relatorios" element={<Relatorios />} />
         </Route>
