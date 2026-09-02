@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { PinLogin } from "./PinLogin";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -11,6 +12,7 @@ function greeting(): string {
 
 export function Login() {
   const { signIn } = useAuth();
+  const [mode, setMode] = useState<"email" | "pin">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +26,10 @@ export function Login() {
     const { error } = await signIn(email, password);
     setSubmitting(false);
     if (error) setError("e-mail ou senha inválidos");
+  }
+
+  if (mode === "pin") {
+    return <PinLogin onBack={() => setMode("email")} />;
   }
 
   return (
@@ -99,6 +105,14 @@ export function Login() {
           <p className="text-center text-xs lowercase text-text-secondary">
             pressione <kbd className="rounded border border-border px-1.5 py-0.5">↵ enter</kbd> para entrar
           </p>
+
+          <button
+            type="button"
+            onClick={() => setMode("pin")}
+            className="w-full text-center text-sm lowercase text-primary hover:underline"
+          >
+            entrar com pin
+          </button>
         </form>
 
         <div className="mt-8 border-t border-border pt-6">
