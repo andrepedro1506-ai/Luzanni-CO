@@ -11,7 +11,7 @@ interface StaffMember {
 
 const PIN_LENGTH = 4;
 
-export function PinLogin({ onBack }: { onBack: () => void }) {
+export function PinLogin({ onBack }: { onBack?: () => void }) {
   const { signIn } = useAuth();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
@@ -66,13 +66,15 @@ export function PinLogin({ onBack }: { onBack: () => void }) {
       <div className="flex min-h-screen items-center justify-center bg-bg p-4 text-text-primary">
         <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 sm:p-10">
           <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="text-text-secondary hover:text-text-primary"
-              aria-label="voltar"
-            >
-              <ArrowLeft className="size-5" />
-            </button>
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="text-text-secondary hover:text-text-primary"
+                aria-label="voltar"
+              >
+                <ArrowLeft className="size-5" />
+              </button>
+            )}
             <div className="text-3xl font-extrabold tracking-tight">
               luzanni<span className="text-primary">fin</span>
             </div>
